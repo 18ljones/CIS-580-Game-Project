@@ -10,9 +10,9 @@ namespace GameProject
     {
         private float timer;
         private Gun gun;
-        private float bulletVelocity = 2f;
+        private float bulletVelocity = 10f;
         private Vector2 shotGunDirection;
-        private float bulletAliveTime = 100.0f;
+        private float bulletAliveTime = 75.0f;
 
         public Bullet(Game game, Gun gun) : base(game)
         {

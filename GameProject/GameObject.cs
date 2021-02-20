@@ -10,7 +10,7 @@ namespace GameProject
 {
     public class GameObject //: IDisposable
     {
-        protected Game game;
+        public Game game;
         public Vector2 Position { get; set; }
 
         public Sprite sprite { get; protected set; }

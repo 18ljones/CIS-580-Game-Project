@@ -4,23 +4,28 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 
 namespace GameProject
 {
 
     public enum FireRate
     {
-        FullAuto,
-        SemiAuto,
-        Burst
+        FullAuto = 3,
+        SemiAuto = 10,
+        Burst = 5
     }
 
     public class Gun : GameObject
     {
         private Player player;
         public FireRate FireRate { get; set; }
+        private float fireTimer;
+        private bool isShooting = false;
         public List<Bullet> Bullets = new List<Bullet>();
         public Vector2 MouseDirection => InputManager.GetMouseDirection(new Vector2(game.GraphicsDevice.Viewport.Width, game.GraphicsDevice.Viewport.Height));
+        private SoundEffect shootSoundeffect;
+        private MuzzleFlash muzzleFlash;
 
         public Gun(Game game, Player player, FireRate fireRate) : base(game)
         {
@@ -37,8 +42,11 @@ namespace GameProject
         }
         public override void LoadContent()
         {
+            shootSoundeffect = game.Content.Load<SoundEffect>("shoot_sound");
             sprite = new Sprite(game.Content.Load<Texture2D>("gun"), this);
+            muzzleFlash = new MuzzleFlash(game.Content.Load<Texture2D>("muzzle_flash"), this, 16, 5, 0.03);
             SpriteRenderer.Sprites.Add(sprite);
+            SpriteRenderer.Sprites.Add(muzzleFlash);
             SetStartPosition();
         }
 
@@ -63,9 +71,11 @@ namespace GameProject
 
         public void Shoot()
         {
-            if(InputManager.currentMouseState.LeftButton == ButtonState.Pressed && InputManager.priorMouseState.LeftButton != ButtonState.Pressed)
+            if(InputManager.currentMouseState.LeftButton == ButtonState.Pressed && InputManager.priorMouseState.LeftButton != ButtonState.Pressed && !isShooting)
             {
                 Bullets.Add(new Bullet(game, this));
+                muzzleFlash.SpawnMuzzleFlash();
+                shootSoundeffect.Play();
             }
         }
 

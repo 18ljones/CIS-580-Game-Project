@@ -13,17 +13,39 @@ namespace GameProject
 
         public Gun Gun => gun;
 
+        public bool Stunned { get; set; } = false;
+        private double stunnedTimer;
+        private int stunnedTime = 1;
+        private Vector2 stunnedDir;
+        private float stunnedPower = 3;
+
         public Player(Game game) : base(game)
         {
             this.gun = new Gun(game, this, FireRate.SemiAuto);
         }
 
-        public override void Update(GameTime gameTime)
+        public void Update(GameTime gameTime, List<Enemy> enemies)
         {
-            Position += InputManager.PlayerDirection;
+            if (!Stunned)
+            {
+                Position += InputManager.PlayerDirection;
+            }
+            else
+            {
+                stunnedTimer += gameTime.ElapsedGameTime.TotalSeconds;
+                Position += stunnedDir * (stunnedPower * (float)stunnedTimer);
+                if(stunnedTimer > stunnedTime)
+                {
+                    Stunned = false;
+                    stunnedTimer = 0;
+                    sprite.Color = Color.Black;
+                }
+            }
+
             gun.Update(gameTime);
             CheckPlayerOutOfBounds();
             UpdateColliderPosition();
+            CheckEnemyCollision(enemies);
         }
 
         public override void LoadContent()
@@ -38,28 +60,41 @@ namespace GameProject
 
         public void CheckPlayerOutOfBounds()
         {
-            if (Position.X < game.GraphicsDevice.Viewport.X)
+            if (Position.X < game.GraphicsDevice.Viewport.X + sprite.texture.Width / 2)
             {
-                Position = new Vector2(game.GraphicsDevice.Viewport.X, Position.Y);
+                Position = new Vector2(game.GraphicsDevice.Viewport.X + sprite.texture.Width / 2, Position.Y);
             }
-            else if(Position.X > game.GraphicsDevice.Viewport.Width - sprite.texture.Width)
+            else if(Position.X > game.GraphicsDevice.Viewport.Width - sprite.texture.Width / 2)
             {
-                Position = new Vector2(game.GraphicsDevice.Viewport.Width - sprite.texture.Width, Position.Y);
+                Position = new Vector2(game.GraphicsDevice.Viewport.Width - sprite.texture.Width / 2, Position.Y);
             }
 
-            if (Position.Y < game.GraphicsDevice.Viewport.Y)
+            if (Position.Y < game.GraphicsDevice.Viewport.Y + sprite.texture.Height / 2)
             {
-                Position = new Vector2(Position.X, game.GraphicsDevice.Viewport.Y);
+                Position = new Vector2(Position.X, game.GraphicsDevice.Viewport.Y + sprite.texture.Height / 2);
             }
-            else if(Position.Y > game.GraphicsDevice.Viewport.Height - sprite.texture.Height)
+            else if(Position.Y > game.GraphicsDevice.Viewport.Height - sprite.texture.Height / 2)
             {
-                Position = new Vector2(Position.X, game.GraphicsDevice.Viewport.Height - sprite.texture.Height);
+                Position = new Vector2(Position.X, game.GraphicsDevice.Viewport.Height - sprite.texture.Height / 2);
             }
         }
 
         public override void SetStartPosition()
         {
             Position = new Vector2((game.GraphicsDevice.Viewport.Width / 2) - (sprite.texture.Width / 2), (game.GraphicsDevice.Viewport.Height / 2) - (sprite.texture.Height / 2));
+        }
+
+        public void CheckEnemyCollision(List<Enemy> enemies)
+        {
+            foreach(Enemy e in enemies)
+            {
+                if (!Stunned && Collider.CollidesWith(e.Collider))
+                {
+                    Stunned = true;
+                    stunnedDir = Vector2.Normalize(this.Position - e.Position);
+                    sprite.Color = Color.Red;
+                }
+            }
         }
     }
 }

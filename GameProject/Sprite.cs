@@ -9,9 +9,9 @@ namespace GameProject
 {
     public class Sprite
     {
-        public Texture2D texture { get; private set; }
+        public Texture2D texture { get; protected set; }
         public Color Color { get; set; } = Color.White;
-        private GameObject owner;
+        protected GameObject owner;
         public float Rotation { get; set; } = 0;
 
         public bool IsAlive { get; set; } = true;
@@ -22,7 +22,7 @@ namespace GameProject
             owner = obj;
         }
 
-        public virtual void Draw(SpriteBatch spriteBatch)
+        public virtual void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             if (texture is null) throw new InvalidOperationException("Texture must be loaded to render");
             spriteBatch.Draw(texture, owner.Position, null, Color, Rotation, new Vector2(texture.Width/2f, texture.Height/2f), 1, SpriteEffects.None, 0);

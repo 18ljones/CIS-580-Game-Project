@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace GameProject
@@ -9,12 +10,12 @@ namespace GameProject
     {
         public static List<Sprite> Sprites = new List<Sprite>();
 
-        public static void DrawSprites(SpriteBatch spriteBatch)
+        public static void DrawSprites(SpriteBatch spriteBatch, GameTime gameTime)
         {
             foreach(Sprite s in Sprites)
             {
-                if(s.IsAlive)
-                    s.Draw(spriteBatch);
+                if (s.IsAlive)
+                    s.Draw(spriteBatch, gameTime);
             }
         }
     }

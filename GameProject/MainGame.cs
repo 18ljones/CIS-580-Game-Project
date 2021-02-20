@@ -26,7 +26,7 @@ namespace GameProject
             player = new Player(this);
             for(int i = 0; i < 5; i++)
             {
-                enemies.Add(new Enemy(this));
+                enemies.Add(new Enemy(this, player));
             }
 
             base.Initialize();
@@ -45,12 +45,11 @@ namespace GameProject
             // TODO: Add your update logic here
             InputManager.Update(gameTime);
             if (InputManager.Exit) Exit();
-            player.Update(gameTime);
+            player.Update(gameTime, enemies);
             foreach(Enemy e in enemies)
             {
-                e.CheckForDamage(player.Gun.Bullets);
+                e.Update(gameTime, enemies);
             }
-
             base.Update(gameTime);
         }
 
@@ -60,7 +59,7 @@ namespace GameProject
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
-            SpriteRenderer.DrawSprites(_spriteBatch);
+            SpriteRenderer.DrawSprites(_spriteBatch, gameTime);
             _spriteBatch.End();
 
             base.Draw(gameTime);
