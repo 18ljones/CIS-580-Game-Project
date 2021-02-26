@@ -23,7 +23,7 @@ namespace GameProject
         private float fireTimer;
         private bool isShooting = false;
         public List<Bullet> Bullets = new List<Bullet>();
-        public Vector2 MouseDirection => InputManager.GetMouseDirection(new Vector2(game.GraphicsDevice.Viewport.Width, game.GraphicsDevice.Viewport.Height));
+        public Vector2 MouseDirection => InputManager.GetMouseDirection();
         private SoundEffect shootSoundeffect;
         private MuzzleFlash muzzleFlash;
 
@@ -52,7 +52,6 @@ namespace GameProject
 
         public void UpdateGunRotation(Vector2 mouseDirection)
         {
-            //gun.Rotation = rotation;
             float angle = GetGunAngle(mouseDirection);
             Vector2 point = GetGunDirection(angle);
             sprite.Rotation = angle - MathF.PI / 2;
@@ -66,7 +65,8 @@ namespace GameProject
 
         public float GetGunAngle(Vector2 mouseDirection)
         {
-            return MathF.Atan2(mouseDirection.Y, mouseDirection.X);
+            Vector2 dPos = Position - mouseDirection;
+            return MathF.Atan2(dPos.Y, dPos.X);
         }
 
         public void Shoot()
@@ -75,7 +75,7 @@ namespace GameProject
             {
                 Bullets.Add(new Bullet(game, this));
                 muzzleFlash.SpawnMuzzleFlash();
-                shootSoundeffect.Play();
+                shootSoundeffect.Play(0.4f, 0.0f, 0.0f);
             }
         }
 

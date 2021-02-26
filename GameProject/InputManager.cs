@@ -15,11 +15,12 @@ namespace GameProject
 
         public static Vector2 PlayerDirection { get; private set; }
         public static int PlayerSpeed { get; set; } = 250;
-
         public static Vector2 MouseDirection { get; private set; }
-
-
+        public static int Score { get; set; } = 0;
+        public static float TimeAlive { get; set; } = 0f;
+        public static int TimesHit { get; set; } = 0;
         public static bool Exit { get; private set; }
+        public static bool IsPaused { get; set; }
 
         public static void Update(GameTime gameTime)
         {
@@ -32,8 +33,14 @@ namespace GameProject
             UpdatePlayerMovement(gameTime);
             MouseDirection = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit = true;
+            if (currentKeyboardState.IsKeyDown(Keys.Escape) && priorKeyboardState.IsKeyUp(Keys.Escape))
+            {
+                Time.TimeScale = Time.TimeScale == 1 ? 0 : 1;
+                IsPaused = Time.TimeScale == 0;
+                //Exit = true;
+            }
+            TimeAlive += Time.ScaledTime;
+                
         }
 
         public static void UpdatePlayerMovement(GameTime gameTime)
@@ -43,25 +50,66 @@ namespace GameProject
             // Get position from Keyboard
             if (currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A))
             {
-                PlayerDirection += new Vector2(-PlayerSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds, 0);
+                PlayerDirection += new Vector2(-PlayerSpeed * Time.ScaledTime, 0);
             }
             if (currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D))
             {
-                PlayerDirection += new Vector2(PlayerSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds, 0);
+                PlayerDirection += new Vector2(PlayerSpeed * Time.ScaledTime, 0);
             }
             if (currentKeyboardState.IsKeyDown(Keys.Up) || currentKeyboardState.IsKeyDown(Keys.W))
             {
-                PlayerDirection += new Vector2(0, -PlayerSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
+                PlayerDirection += new Vector2(0, -PlayerSpeed * Time.ScaledTime);
             }
             if (currentKeyboardState.IsKeyDown(Keys.Down) || currentKeyboardState.IsKeyDown(Keys.S))
             {
-                PlayerDirection += new Vector2(0, PlayerSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
+                PlayerDirection += new Vector2(0, PlayerSpeed * Time.ScaledTime);
             }
         }
 
-        public static Vector2 GetMouseDirection(Vector2 screenSize)
+        public static Vector2 GetMouseDirection()
         {
-            return Vector2.Normalize((screenSize / 2 - MouseDirection) - PlayerDirection);
+            return new Vector2(currentMouseState.X, currentMouseState.Y);
+        }
+
+        public static void KeepMouseInWindow(Game game)
+        {
+            if (IsPaused) return;
+
+            int mouseX = Mouse.GetState().X;
+            int MouseY = Mouse.GetState().Y;
+            bool oob = false; //if mouse is out of bounds
+            if (game.IsActive)
+            {
+                if (mouseX > game.GraphicsDevice.Viewport.Width)
+                {
+                    mouseX = game.GraphicsDevice.Viewport.Width;
+                    oob = true;
+                }
+                else if (mouseX < 0)
+                {
+                    mouseX = 0;
+                    oob = true;
+                }
+                
+                if (MouseY > game.GraphicsDevice.Viewport.Height)
+                {
+                    MouseY = game.GraphicsDevice.Viewport.Height;
+                    oob = true;
+                }
+                else if (MouseY < 0)
+                {
+                    MouseY = 0;
+                    oob = true;
+                }
+
+                if(oob) 
+                    Mouse.SetPosition(mouseX, MouseY);
+            }
+        }
+
+        public static void LogError(string error)
+        {
+            System.Diagnostics.Debug.WriteLine(error);
         }
     }
 }

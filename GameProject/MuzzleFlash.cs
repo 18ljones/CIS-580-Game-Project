@@ -22,7 +22,7 @@ namespace GameProject
 
         public override void UpdateAnimationFrame(GameTime gameTime)
         {
-            animationTimer += gameTime.ElapsedGameTime.TotalSeconds;
+            animationTimer += Time.ScaledTime;
 
             if (animationTimer > animationSpeed)
             {

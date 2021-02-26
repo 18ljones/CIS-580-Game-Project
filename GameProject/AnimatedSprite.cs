@@ -37,7 +37,7 @@ namespace GameProject
         {
             if (IsAlive)
             {
-                animationTimer += gameTime.ElapsedGameTime.TotalSeconds;
+                animationTimer += Time.ScaledTime;
 
                 if(animationTimer > animationSpeed)
                 {

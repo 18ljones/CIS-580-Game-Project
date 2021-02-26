@@ -9,7 +9,7 @@ namespace GameProject
     public class Enemy : GameObject
     {
         public int Health { get; set; } = 1;
-        public float Speed { get; set; } = (float)(Helper.random.NextDouble() / 2 + 0.25);
+        public float Speed { get; set; } = (float)(Helper.random.NextDouble() * 300 + 150);
 
         private Player target;
 
@@ -21,9 +21,12 @@ namespace GameProject
 
         public void Update(GameTime gameTime, List<Enemy> enemies)
         {
-            MoveTowardsTarget(gameTime);
-            CheckForDamage(target.Gun.Bullets);
-            CheckForEnemyCollisions(enemies);
+            IsAlive = true;
+            if (!CheckForDamage(target.Gun.Bullets))
+            {
+                MoveTowardsTarget(gameTime);
+                CheckForEnemyCollisions(enemies);
+            }
             UpdateColliderPosition();
         }
 
@@ -43,29 +46,39 @@ namespace GameProject
             Position = new Vector2((float)(game.GraphicsDevice.Viewport.Width * Helper.random.NextDouble() + randomSpotW), (float)(game.GraphicsDevice.Viewport.Height * Helper.random.NextDouble() + randomSpotH));
         }
 
-        public void CheckForDamage(List<Bullet> bullets)
+        public bool CheckForDamage(List<Bullet> bullets)
         {
             foreach(Bullet b in bullets)
             {
-                if (Collider.CollidesWith(b.Collider))
+                if (Collider.CollidesWith(b.Collider) && b.IsAlive)
                 {
-                    SetStartPosition();
-                    Speed = (float)(Helper.random.NextDouble() / 2 + 0.25);
+                    this.Kill();
+                    Speed = (float)(Helper.random.NextDouble() * 200 + 100);
+                    InputManager.Score++;
+                    InputManager.LogError("dead");
+                    b.Kill();
+                    return true;
                 }
             }
+            return false;
         }
 
         public void MoveTowardsTarget(GameTime gameTime)
         {
-            Vector2 moveDirection = target.Position - Position;
-            Position += moveDirection * Speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Vector2 distanceBetween = target.Position - Position;
+            if (distanceBetween != Vector2.Zero)
+                distanceBetween.Normalize();
+            else
+                distanceBetween = Vector2.Zero;
+            
+            Position += distanceBetween * Speed * Time.ScaledTime;
         }
 
         public void CheckForEnemyCollisions(List<Enemy> enemies)
         {
             foreach(Enemy e in enemies)
             {
-                if (e != this && this.Collider.CollidesWith(e.Collider))
+                if (e != this && e.IsAlive && this.IsAlive && this.Collider.CollidesWith(e.Collider))
                 {
                     Vector2 distance_inside = this.Position - e.Position;
 
@@ -75,6 +88,12 @@ namespace GameProject
                     }
                 }
             }
+        }
+
+        public override void Kill()
+        {
+            IsAlive = false;
+            SetStartPosition();
         }
 
     }

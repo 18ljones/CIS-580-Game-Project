@@ -10,7 +10,7 @@ namespace GameProject
     {
         private float timer;
         private Gun gun;
-        private float bulletVelocity = 10f;
+        private float bulletVelocity = 850f;
         private Vector2 shotGunDirection;
         private float bulletAliveTime = 75.0f;
 
@@ -23,8 +23,8 @@ namespace GameProject
 
         public override void Update(GameTime gameTime)
         {
-            timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            Position += shotGunDirection * bulletVelocity;
+            timer += Time.ScaledTime;
+            Position += shotGunDirection * bulletVelocity * Time.ScaledTime;
             CheckLifeTime();
             UpdateColliderPosition();
         }

@@ -42,7 +42,7 @@ namespace GameProject
             return;
         }
 
-        public void Kill()
+        public virtual void Kill()
         {
             sprite.IsAlive = false;
             IsAlive = false;

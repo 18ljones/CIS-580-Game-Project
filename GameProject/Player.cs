@@ -17,7 +17,7 @@ namespace GameProject
         private double stunnedTimer;
         private int stunnedTime = 1;
         private Vector2 stunnedDir;
-        private float stunnedPower = 3;
+        private float stunnedPower = 6;
 
         public Player(Game game) : base(game)
         {
@@ -32,7 +32,7 @@ namespace GameProject
             }
             else
             {
-                stunnedTimer += gameTime.ElapsedGameTime.TotalSeconds;
+                stunnedTimer += Time.ScaledTime;
                 Position += stunnedDir * (stunnedPower * (float)stunnedTimer);
                 if(stunnedTimer > stunnedTime)
                 {
@@ -88,11 +88,17 @@ namespace GameProject
         {
             foreach(Enemy e in enemies)
             {
-                if (!Stunned && Collider.CollidesWith(e.Collider))
+                if (Collider.CollidesWith(e.Collider))
                 {
-                    Stunned = true;
-                    stunnedDir = Vector2.Normalize(this.Position - e.Position);
-                    sprite.Color = Color.Red;
+                    if (!Stunned)
+                    {
+                        Stunned = true;
+                        stunnedDir = Vector2.Normalize(this.Position - e.Position);
+                        sprite.Color = Color.Red;
+                        InputManager.TimeAlive = 0;
+                        InputManager.TimesHit++;
+                    }
+                    e.Kill();
                 }
             }
         }
