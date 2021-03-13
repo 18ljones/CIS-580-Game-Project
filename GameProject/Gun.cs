@@ -75,7 +75,7 @@ namespace GameProject
             {
                 Bullets.Add(new Bullet(game, this));
                 muzzleFlash.SpawnMuzzleFlash();
-                shootSoundeffect.Play(0.4f, 0.0f, 0.0f);
+                shootSoundeffect.Play(1f, 0.0f, 0.0f);
             }
         }
 
@@ -88,6 +88,14 @@ namespace GameProject
                     Bullets[i] = null;
                     Bullets.RemoveAt(i);
                 }
+            }
+        }
+
+        public void KillBullets()
+        {
+            foreach(Bullet b in Bullets)
+            {
+                b.Kill();
             }
         }
 

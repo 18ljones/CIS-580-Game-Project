@@ -6,7 +6,7 @@ namespace GameProject
 {
     public static class Time
     {
-        public static float TimeScale = 1;
+        public static float TimeScale = 0;
 
         public static float ScaledTime { get; private set; }
 

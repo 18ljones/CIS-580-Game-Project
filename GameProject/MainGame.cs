@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using GameProject.UI;
+using Microsoft.Xna.Framework.Media;
 
 namespace GameProject
 {
@@ -10,11 +12,13 @@ namespace GameProject
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private Player player;
-
-        private List<Enemy> enemies = new List<Enemy>();
+        
         private SpriteFont bangers;
+        private Song backgroundMusic;
+        private GameScreen gameScreen;
         private PauseMenu pauseMenu;
+        private MainMenu mainMenu;
+        private SettingsMenu settingsMenu;
 
         public MainGame()
         {
@@ -29,12 +33,7 @@ namespace GameProject
             _graphics.PreferredBackBufferHeight = 720;
             //_graphics.IsFullScreen = true;
             _graphics.ApplyChanges();
-            // TODO: Add your initialization logic here
-            player = new Player(this);
-            for(int i = 0; i < 5; i++)
-            {
-                enemies.Add(new Enemy(this, player));
-            }
+            // TODO: Add your initialization logic her
 
             base.Initialize();
         }
@@ -44,9 +43,16 @@ namespace GameProject
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            player.LoadContent();
             bangers = Content.Load<SpriteFont>("bangers");
+            backgroundMusic = Content.Load<Song>("Acción (Merodeador Nocturno)");
             pauseMenu = new PauseMenu(this, bangers);
+            mainMenu = new MainMenu(this, bangers);
+            settingsMenu = new SettingsMenu(this, bangers);
+            gameScreen = new GameScreen(this, bangers);
+            gameScreen.LoadContent();
+
+            MediaPlayer.IsRepeating = true;
+            MediaPlayer.Play(backgroundMusic);
         }
 
         protected override void Update(GameTime gameTime)
@@ -56,15 +62,33 @@ namespace GameProject
             // TODO: Add your update logic here
             InputManager.KeepMouseInWindow(this);
             InputManager.Update(gameTime);
-            if (InputManager.Exit) Exit();
-            if (Time.ScaledTime != 0)
+            
+            if (InputManager.Exit) Exit();           
+
+            if(InputManager.CurrentGameState == GameState.MainMenu)
             {
-                player.Update(gameTime, enemies);
-                foreach (Enemy e in enemies)
-                {
-                    e.Update(gameTime, enemies);
-                }
-                
+                mainMenu.Update(gameTime);
+            }
+
+            if(InputManager.CurrentGameState == GameState.Game)
+            {
+                gameScreen.Update(gameTime);
+            }
+
+            if (InputManager.CurrentGameState == GameState.PauseMenu)
+            {
+                pauseMenu.Update(gameTime);
+            }
+
+            if (InputManager.CurrentGameState == GameState.SettingsMenu)
+            {
+                settingsMenu.Update(gameTime);
+            }
+
+            if (InputManager.Restart)
+            {
+                gameScreen.Restart();
+                InputManager.Restart = false;
             }
             base.Update(gameTime);
 
@@ -73,17 +97,28 @@ namespace GameProject
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.DarkGreen);
-            TimeSpan timeAlive = TimeSpan.FromSeconds((double)(new decimal(InputManager.TimeAlive)));
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
-            SpriteRenderer.DrawSprites(_spriteBatch, gameTime);
-            _spriteBatch.DrawString(bangers, $"Score: {InputManager.Score}", new Vector2(2, 2), Color.White);
-            _spriteBatch.DrawString(bangers, $"Times Hit: {InputManager.TimesHit}", new Vector2(2, 40), Color.White);
-            _spriteBatch.DrawString(bangers, $"Times Alive: {timeAlive.TotalMinutes:00}:{timeAlive.Seconds:00}.{timeAlive.Milliseconds:00}", new Vector2(2, 80), Color.White);
+            
 
-            if (InputManager.IsPaused)
+            if (InputManager.CurrentGameState == GameState.MainMenu)
+            {
+                mainMenu.Draw(_spriteBatch, gameTime);
+            }
+
+            if (InputManager.CurrentGameState == GameState.Game || InputManager.IsPlaying)
+            {
+                gameScreen.Draw(gameTime, _spriteBatch);
+            }
+
+            if (InputManager.CurrentGameState == GameState.PauseMenu)
             {
                 pauseMenu.Draw(_spriteBatch, gameTime);
+            }
+
+            if(InputManager.CurrentGameState == GameState.SettingsMenu)
+            {
+                settingsMenu.Draw(_spriteBatch, gameTime);
             }
             _spriteBatch.End();
 

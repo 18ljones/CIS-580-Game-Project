@@ -13,6 +13,12 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Acción (Merodeador Nocturno).mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Acción (Merodeador Nocturno).mp3
+
 #begin ball.png
 /importer:TextureImporter
 /processor:TextureProcessor

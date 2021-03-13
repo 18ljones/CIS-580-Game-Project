@@ -20,7 +20,11 @@ namespace GameProject
         public static float TimeAlive { get; set; } = 0f;
         public static int TimesHit { get; set; } = 0;
         public static bool Exit { get; private set; }
-        public static bool IsPaused { get; set; }
+        public static bool IsPlaying { get; set; } = false;
+        public static bool Restart { get; set; } = false;
+        public static int GameVolume { get; set; } = 100;
+        public static GameState CurrentGameState { get; set; } = GameState.MainMenu;
+        public static GameState PreviousGameState { get; set; } = GameState.MainMenu;
 
         public static void Update(GameTime gameTime)
         {
@@ -30,13 +34,24 @@ namespace GameProject
             priorMouseState = currentMouseState;
             currentMouseState = Mouse.GetState();
 
-            UpdatePlayerMovement(gameTime);
             MouseDirection = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
 
-            if (currentKeyboardState.IsKeyDown(Keys.Escape) && priorKeyboardState.IsKeyUp(Keys.Escape))
+            if(CurrentGameState == GameState.Game)
+                UpdatePlayerMovement(gameTime);
+
+            if (currentKeyboardState.IsKeyDown(Keys.Escape) && priorKeyboardState.IsKeyUp(Keys.Escape) && (CurrentGameState == GameState.Game || CurrentGameState == GameState.PauseMenu))
             {
                 Time.TimeScale = Time.TimeScale == 1 ? 0 : 1;
-                IsPaused = Time.TimeScale == 0;
+                if(CurrentGameState == GameState.Game)
+                {
+                    PreviousGameState = CurrentGameState;
+                    CurrentGameState = GameState.PauseMenu;
+                }
+                else if(CurrentGameState == GameState.PauseMenu)
+                {
+                    PreviousGameState = CurrentGameState;
+                    CurrentGameState = GameState.Game;
+                }
                 //Exit = true;
             }
             TimeAlive += Time.ScaledTime;
@@ -73,7 +88,7 @@ namespace GameProject
 
         public static void KeepMouseInWindow(Game game)
         {
-            if (IsPaused) return;
+            if (CurrentGameState == GameState.PauseMenu) return;
 
             int mouseX = Mouse.GetState().X;
             int MouseY = Mouse.GetState().Y;
@@ -111,5 +126,13 @@ namespace GameProject
         {
             System.Diagnostics.Debug.WriteLine(error);
         }
+    }
+
+    public enum GameState
+    {
+        MainMenu,
+        SettingsMenu,
+        PauseMenu,
+        Game
     }
 }

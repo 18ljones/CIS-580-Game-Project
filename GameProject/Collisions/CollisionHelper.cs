@@ -24,5 +24,10 @@ namespace GameProject.Collisions
 
             return Math.Pow(c.Radius, 2) >= Math.Pow(c.Center.X - nearestX, 2) + Math.Pow(c.Center.Y - nearestY, 2);
         }
+
+        public static bool Contains(BoundingRectangle a, int otherX, int otherY)
+        {
+            return (otherY <= a.Bottom && otherY >= a.Top) && (otherX >= a.Left && otherX <= a.Right);
+        }
     }
 }
